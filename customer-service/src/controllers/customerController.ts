@@ -9,6 +9,8 @@ import {
     isValidCustomerBody,
     isValidEmail,
 } from '../validations/customerValidation.js';
+import { publishCustomerRegisteredEvent } from '../kafka/producer.js';
+import type { CustomerRegisteredEvent } from '../types/customerRegisteredEvent.js';
 
 export async function createCustomerHandler(req: Request, res: Response): Promise<void> {
     try {
@@ -39,10 +41,7 @@ export async function createCustomerHandler(req: Request, res: Response): Promis
         zipcode: customer.zipcode,
         });
 
-        res
-        .status(201)
-        .location(`/customers/${newId}`)
-        .json({
+        const createdCustomer: CustomerRegisteredEvent = {
             id: newId,
             userId: customer.userId,
             name: customer.name,
@@ -52,7 +51,14 @@ export async function createCustomerHandler(req: Request, res: Response): Promis
             city: customer.city,
             state: normalizedState,
             zipcode: customer.zipcode,
-        });
+        };
+
+        await publishCustomerRegisteredEvent(createdCustomer);
+
+        res
+        .status(201)
+        .location(`/customers/${newId}`)
+        .json(createdCustomer);
     } catch (error) {
         console.error('createCustomerHandler error:', error);
         res.sendStatus(500);

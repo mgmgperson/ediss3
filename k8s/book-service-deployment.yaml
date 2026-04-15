@@ -35,6 +35,8 @@ spec:
                   key: DB_PASSWORD
             - name: DB_NAME
               value: "books_db"
+            - name: RECOMMENDATION_SERVICE_BASE_URL
+              value: "http://98.88.99.206"
           livenessProbe:
             httpGet:
               path: /status

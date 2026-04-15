@@ -12,6 +12,16 @@ import {
 } from '../validations/bookValidation.js';
 import { generateBookSummary } from '../services/llmService.js';
 import type { NewBook } from '../types/book.js';
+import {
+    closeCircuit,
+    isWithinOpenWindow,
+    openCircuit,
+    shouldAllowTrialRequest,
+} from '../services/circuitBreakerService.js';
+import {
+    fetchRelatedBooksByIsbn,
+    RecommendationTimeoutError,
+} from '../services/recommendationService.js';
 
 export async function createBookHandler(req: Request, res: Response): Promise<void> {
     try {
@@ -139,6 +149,60 @@ export async function updateBookHandler(req: Request, res: Response): Promise<vo
         });
     } catch (error) {
         console.error('updateBookHandler error:', error);
+        res.sendStatus(500);
+    }
+}
+
+export async function getRelatedBooksHandler(req: Request, res: Response): Promise<void> {
+    try {
+        const isbn = getIsbnParam(req.params.ISBN);
+
+        if (!isbn) {
+            res.sendStatus(400);
+            return;
+        }
+
+        const existingBook = await getBookByIsbn(isbn);
+        if (!existingBook) {
+            res.sendStatus(404);
+            return;
+        }
+
+        if (isWithinOpenWindow()) {
+            res.sendStatus(503);
+            return;
+        }
+
+        const isTrialRequest = shouldAllowTrialRequest();
+
+        try {
+            const relatedBooks = await fetchRelatedBooksByIsbn(isbn);
+
+            closeCircuit();
+
+            if (relatedBooks.length === 0) {
+                res.sendStatus(204);
+                return;
+            }
+
+            res.status(200).json(relatedBooks);
+        } catch (error) {
+            if (error instanceof RecommendationTimeoutError) {
+                openCircuit();
+
+                if (isTrialRequest) {
+                    res.sendStatus(503);
+                    return;
+                }
+
+                res.sendStatus(504);
+                return;
+            }
+
+            throw error;
+        }
+    } catch (error) {
+        console.error('getRelatedBooksHandler error:', error);
         res.sendStatus(500);
     }
 }

@@ -1,1 +1,4 @@
-http://bookstore-dev-ExternalALB-829721630.us-east-1.elb.amazonaws.com
+http://a07855dd6c8cf4737ac9e6ab6374c86c-1101975919.us-east-1.elb.amazonaws.com
+http://aa404b8b9d2f347b5bd1bb29c85de314-201429655.us-east-1.elb.amazonaws.com
+aclin2
+edissaclin2@gmail.com
