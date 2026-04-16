@@ -67,14 +67,57 @@ export async function fetchRelatedBooksByIsbn(isbn: string): Promise<RelatedBook
       throw new Error(`Recommendation service error ${response.status}: ${text}`);
     }
 
-    const data = (await response.json()) as RecommendationDto[];
+    const rawText = await response.text();
+
+    if (!rawText.trim()) {
+      return [];
+    }
+
+    let data: unknown;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      return [];
+    }
 
     if (!Array.isArray(data)) {
-      throw new Error('Recommendation service returned invalid payload');
+      return [];
     }
 
     return data
-      .map(normalizeRecommendation)
+      .map((value) => {
+        if (!value || typeof value !== 'object') {
+          return null;
+        }
+
+        const item = value as Record<string, unknown>;
+
+        const normalizedIsbn =
+          typeof item.isbn === 'string' ? item.isbn :
+          typeof item.ISBN === 'string' ? item.ISBN :
+          null;
+
+        const normalizedTitle =
+          typeof item.title === 'string' ? item.title :
+          typeof item.Title === 'string' ? item.Title :
+          null;
+
+        const normalizedAuthor =
+          typeof item.authors === 'string' ? item.authors :
+          typeof item.Author === 'string' ? item.Author :
+          typeof item.authors === 'object' && item.authors !== null ? JSON.stringify(item.authors) :
+          null;
+
+        if (!normalizedIsbn || !normalizedTitle || !normalizedAuthor) {
+          return null;
+        }
+
+        return {
+          ISBN: normalizedIsbn,
+          title: normalizedTitle,
+          Author: normalizedAuthor,
+        };
+      })
       .filter((book): book is RelatedBook => book !== null);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {

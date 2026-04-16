@@ -24,14 +24,12 @@ import {
 } from '../services/recommendationService.js';
 
 function buildFallbackSummary(book: NewBook): string {
-  return [
-    `${book.title} by ${book.Author} is a ${book.genre} book.`,
-    book.description,
-    `This nice book is listed in the bookstore with a total price of $${book.price.toFixed(2)} and a quantity of ${book.quantity}.`,
-    `This complete title is identified in the system with the ISBN ${book.ISBN}.`,
-    `Readers have praised ${book.title} for its engaging storytelling and compelling characters, making it a must-read for fans of ${book.genre}.`,
-    `Grab your copy of ${book.title} today and dive into an unforgettable reading experience!`
-  ].join(' ');
+    return [
+        `${book.title} by ${book.Author} is a ${book.genre} title that stands out for the ideas and themes suggested by its description. ${book.description}`,
+        `This book invites readers into a focused reading experience that is likely to appeal to people who enjoy thoughtful writing, a clear point of view, and material that stays grounded in its central subject. The combination of title, author, genre, and description suggests a work that aims to be both accessible and meaningful, giving readers a strong sense of what the book is about while also leaving room for deeper reflection.`,
+        `A reader picking up ${book.title} can expect a text that develops its topic in a way that feels intentional and organized. The description indicates that the book is built around a recognizable core idea, and that makes it easier for readers to understand why this work matters and what kind of value it may offer. Depending on the reader’s interests, it may serve as an introduction to the subject, a useful reference point, or simply an enjoyable and memorable read.`,
+        `In the bookstore system, this title is listed with ISBN ${book.ISBN}, a price of $${book.price.toFixed(2)}, and an available quantity of ${book.quantity}. Those details identify the exact edition in inventory while also confirming that the book is currently available for purchase. Overall, ${book.title} appears to be a strong option for readers looking for a ${book.genre} book with a clear focus, a distinct authorial voice, and a description that immediately communicates its purpose.`
+    ].join(' ');
 }
 
 export async function createBookHandler(req: Request, res: Response): Promise<void> {
