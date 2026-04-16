@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 
-export function requireClientType(expectedClientType: 'Web' | 'iOS' | 'Android') {
+export function requireClientType(expectedClientTypes: ('Web' | 'iOS' | 'Android')[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const clientType = req.header('X-Client-Type');
 
@@ -9,7 +9,7 @@ export function requireClientType(expectedClientType: 'Web' | 'iOS' | 'Android')
       return;
     }
 
-    if (clientType.trim().toLowerCase() !== expectedClientType.toLowerCase()) {
+    if (!expectedClientTypes.includes(clientType.trim().toLowerCase() as 'Web' | 'iOS' | 'Android')) {
       res.sendStatus(400);
       return;
     }

@@ -5,7 +5,7 @@ import { requireJwt } from '../middleware/requireJwt.js';
 
 export function registerCustomerRoutes(app: Router): void {
   app.use('/customers', requireJwt());
-  app.use('/customers', requireClientType('Web'));
+  app.use('/customers', requireClientType(['Web', 'iOS', 'Android']));
   
   app.all('/customers', proxyCustomers);
   app.all('/customers/*splat', proxyCustomersWithPath);
