@@ -37,6 +37,13 @@ spec:
               value: "books_db"
             - name: RECOMMENDATION_SERVICE_BASE_URL
               value: "http://34.195.107.7"
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: book-llm-secret
+                  key: GEMINI_API_KEY
+            - name: GEMINI_MODEL
+              value: "gemini-2.5-flash-lite"
           livenessProbe:
             httpGet:
               path: /status
