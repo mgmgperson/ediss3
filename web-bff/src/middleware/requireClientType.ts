@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 
-export function requireClientType(expectedClientTypes: ('Web' | 'iOS' | 'Android')[]) {
+export function requireClientType(expectedClientTypes: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const clientType = req.header('X-Client-Type');
 
@@ -9,9 +9,7 @@ export function requireClientType(expectedClientTypes: ('Web' | 'iOS' | 'Android
       return;
     }
 
-    const normalized = clientType.trim();
-
-    if (!expectedClientTypes.includes(normalized as 'Web' | 'iOS' | 'Android')) {
+    if (!expectedClientTypes.includes(clientType)) {
       res.sendStatus(400);
       return;
     }
