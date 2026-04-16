@@ -9,7 +9,9 @@ export function requireClientType(expectedClientTypes: ('Web' | 'iOS' | 'Android
       return;
     }
 
-    if (!expectedClientTypes.includes(clientType.trim().toLowerCase() as 'Web' | 'iOS' | 'Android')) {
+    const normalized = clientType.trim();
+
+    if (!expectedClientTypes.includes(normalized as 'Web' | 'iOS' | 'Android')) {
       res.sendStatus(400);
       return;
     }

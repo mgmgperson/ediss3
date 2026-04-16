@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: web-bff
-          image: docker.io/mgperson/web-bff:final8
+          image: docker.io/mgperson/web-bff:final9
           imagePullPolicy: Always
           ports:
             - containerPort: 80
