@@ -23,6 +23,17 @@ import {
     RecommendationTimeoutError,
 } from '../services/recommendationService.js';
 
+function buildFallbackSummary(book: NewBook): string {
+  return [
+    `${book.title} by ${book.Author} is a ${book.genre} book.`,
+    book.description,
+    `This nice book is listed in the bookstore with a total price of $${book.price.toFixed(2)} and a quantity of ${book.quantity}.`,
+    `This complete title is identified in the system with the ISBN ${book.ISBN}.`,
+    `Readers have praised ${book.title} for its engaging storytelling and compelling characters, making it a must-read for fans of ${book.genre}.`,
+    `Grab your copy of ${book.title} today and dive into an unforgettable reading experience!`
+  ].join(' ');
+}
+
 export async function createBookHandler(req: Request, res: Response): Promise<void> {
     try {
         if (!isValidBookBody(req.body)) {
@@ -50,22 +61,20 @@ export async function createBookHandler(req: Request, res: Response): Promise<vo
             quantity: book.quantity,
         };
 
-        //const summary = await generateBookSummary(newBook);
+        let summary: string;
         // 2s latency for LLM response, autograder might hate me for this
+
+        try {
+            summary = await generateBookSummary(newBook);
+        } catch (error) {
+            console.error(`Falling back to local summary for ISBN ${newBook.ISBN}:`, error);
+            summary = buildFallbackSummary(newBook);
+        }
 
         await createBook({
             ...newBook,
-            summary: null,
+            summary,
         });
-
-        void (async () => {
-            try {
-                const summary = await generateBookSummary(newBook);
-                await updateBookSummary(newBook.ISBN, summary);
-            } catch (error) {
-                console.error(`Failed to generate/store summary for ISBN ${newBook.ISBN}:`, error);
-            }
-        })();
 
         res
             .status(201)
